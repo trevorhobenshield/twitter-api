@@ -775,7 +775,7 @@ class Account:
         return self.gql('POST', Operation.DeleteScheduledTweet, variables)
 
     def clear_scheduled_tweets(self) -> None:
-        user_id = int(re.findall('"u=(\d+)"', self.session.cookies.get('twid'))[0])
+        user_id = int(re.findall(r'"u=(\d+)"', self.session.cookies.get('twid'))[0])
         drafts = self.gql('GET', Operation.FetchScheduledTweets, {"ascending": True})
         for _id in set(find_key(drafts, 'rest_id')):
             if _id != user_id:
@@ -790,7 +790,7 @@ class Account:
         return self.gql('POST', Operation.DeleteDraftTweet, variables)
 
     def clear_draft_tweets(self) -> None:
-        user_id = int(re.findall('"u=(\d+)"', self.session.cookies.get('twid'))[0])
+        user_id = int(re.findall(r'"u=(\d+)"', self.session.cookies.get('twid'))[0])
         drafts = self.gql('GET', Operation.FetchDraftTweets, {"ascending": True})
         for _id in set(find_key(drafts, 'rest_id')):
             if _id != user_id:
@@ -829,7 +829,7 @@ class Account:
     @property
     def id(self) -> int:
         """ Get User ID """
-        return int(re.findall('"u=(\d+)"', self.session.cookies.get('twid'))[0])
+        return int(re.findall(r'"u=(\d+)"', self.session.cookies.get('twid'))[0])
 
     def save_cookies(self, fname: str = None):
         """ Save cookies to file """
