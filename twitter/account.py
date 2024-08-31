@@ -829,7 +829,10 @@ class Account:
     @property
     def id(self) -> int:
         """ Get User ID """
-        return int(re.findall('"u=(\d+)"', self.session.cookies.get('twid'))[0])
+        twid = self.session.cookies.get('twid')
+        if not twid:
+            raise Exception(f'[{RED}error{RESET}] No "twid" cookie found')
+        return int(re.findall(r'u%3D(\d+)' if self.session._init_with_cookies else r'"u=(\d+)"', twid)[0])
 
     def save_cookies(self, fname: str = None):
         """ Save cookies to file """
