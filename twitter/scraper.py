@@ -595,6 +595,16 @@ class Scraper:
         }
         r = await client.get(f'https://twitter.com/i/api/graphql/{qid}/{name}', params=build_params(params))
 
+        wait_restrict = kwargs.pop("wait_restrict", False)
+        if r.status_code != 200:    
+          if r.status_code == 429 and wait_restrict:
+            print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
+            await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
+            kwargs["wait_restrict"] = wait_restrict
+            self._query(client, operation, kwargs=kwargs)
+          else:
+            raise HttpResponseError(r.text, r.status_code)
+
         try:
             self.rate_limits[name] = {k: int(v) for k, v in r.headers.items() if 'rate-limit' in k}
         except Exception as e:
