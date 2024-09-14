@@ -601,7 +601,7 @@ class Scraper:
             print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
             await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
             kwargs["wait_restrict"] = wait_restrict
-            self._query(client, operation, kwargs=kwargs)
+            await self._query(client, operation, kwargs=kwargs)
           else:
             raise HttpResponseError(r.text, r.status_code)
 
