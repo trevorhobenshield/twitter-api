@@ -7,12 +7,15 @@ from urllib.parse import urlsplit, urlencode, urlunsplit, parse_qs, quote
 
 import aiofiles
 import orjson
+from errors import HttpResponseError
 from aiofiles.os import makedirs
 from httpx import Response, Client
 from textwrap import dedent
 
 from .constants import GREEN, MAGENTA, RED, RESET, MAX_GQL_CHAR_LIMIT, USER_AGENTS, ORANGE
+import asyncio
 
+DEFAULT_RESTRICT_WAIT = 100
 
 def init_session():
     client = Client(headers={
@@ -45,12 +48,18 @@ def batch_ids(ids: list[int | str], char_limit: int = MAX_GQL_CHAR_LIMIT) -> lis
 def build_params(params: dict) -> dict:
     return {k: orjson.dumps(v).decode() for k, v in params.items()}
 
-
 async def save_json(r: Response, path: str | Path, name: str, **kwargs):
+    if r is None:
+      return
+    
+    if r.status_code < 200:    
+      if r.status_code == 429 and kwargs.pop("wait_restrict", False):
+        print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
+        await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
+      else:
+        raise HttpResponseError(r.text, r.status_code)
+      
     try:
-        if r is None:
-          return
-
         data = r.json()
         kwargs.pop('cursor', None)
 
