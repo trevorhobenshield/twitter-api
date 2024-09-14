@@ -52,8 +52,9 @@ async def save_json(r: Response, path: str | Path, name: str, **kwargs):
     if r is None:
       return
     
-    if r.status_code < 200:    
-      if r.status_code == 429 and kwargs.pop("wait_restrict", False):
+    wait_restrict = kwargs.pop("wait_restrict", False)
+    if r.status_code != 200:    
+      if r.status_code == 429 and wait_restrict:
         print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
         await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
       else:
