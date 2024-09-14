@@ -48,6 +48,9 @@ def build_params(params: dict) -> dict:
 
 async def save_json(r: Response, path: str | Path, name: str, **kwargs):
     try:
+        if r is None:
+          return
+
         data = r.json()
         kwargs.pop('cursor', None)
 
@@ -82,6 +85,8 @@ def get_json(res: list[Response], **kwargs) -> list:
     results = []
     for r in temp:
         try:
+            if r is None:
+                continue
             data = r.json()
             if cursor:
                 results.append([data, cursor])
