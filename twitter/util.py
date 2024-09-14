@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, urlencode, urlunsplit, parse_qs, quote
 
 import aiofiles
 import orjson
-from errors import HttpResponseError
+from .errors import HttpResponseError
 from aiofiles.os import makedirs
 from httpx import Response, Client
 from textwrap import dedent
