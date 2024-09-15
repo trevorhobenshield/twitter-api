@@ -30,6 +30,7 @@ if platform.system() != 'Windows':
     except ImportError as e:
         ...
 
+DEFAULT_RESTRICT_WAIT = 10
 
 class Scraper:
     def __init__(self, email: str = None, username: str = None, password: str = None, session: Client = None, **kwargs):
