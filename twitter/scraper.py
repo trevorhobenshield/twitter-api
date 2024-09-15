@@ -591,7 +591,7 @@ class Scraper:
         wait_restrict = kwargs.pop("wait_restrict", False)
 
         keys, qid, name = operation
-        
+
         for k in keys:
             if k not in kwargs:
                 raise ValueError(f"Invalid args to query '{kwargs}', '{k}' field is needed")
@@ -603,7 +603,6 @@ class Scraper:
 
         r = await client.get(f'https://twitter.com/i/api/graphql/{qid}/{name}', params=build_params(params))
 
-        wait_restrict = kwargs.pop("wait_restrict", False)
         if r.status_code != 200:    
           if r.status_code == 429 and wait_restrict:
             print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
