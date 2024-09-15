@@ -590,11 +590,12 @@ class Scraper:
     async def _query(self, client: AsyncClient, operation: tuple, **kwargs) -> Response:
         wait_restrict = kwargs.pop("wait_restrict", False)
 
+        keys, qid, name = operation
+        
         for k in keys:
             if k not in kwargs:
                 raise ValueError(f"Invalid args to query '{kwargs}', '{k}' field is needed")
         
-        keys, qid, name = operation
         params = {
             'variables': Operation.default_variables | keys | kwargs,
             'features': Operation.default_features,
@@ -608,7 +609,7 @@ class Scraper:
             print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
             await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
             kwargs["wait_restrict"] = wait_restrict
-            await self._query(client, operation, kwargs=kwargs)
+            await self._query(client, operation, **kwargs)
           else:
             raise HttpResponseError(r.text, r.status_code)
 
