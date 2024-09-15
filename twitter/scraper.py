@@ -9,7 +9,7 @@ from typing import Generator
 import websockets
 from httpx import AsyncClient, Limits, ReadTimeout, URL
 from tqdm.asyncio import tqdm_asyncio
-
+from .errors import HttpResponseError
 from .constants import *
 from .login import login
 from .util import *

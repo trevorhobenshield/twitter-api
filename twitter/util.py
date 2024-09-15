@@ -7,11 +7,15 @@ from urllib.parse import urlsplit, urlencode, urlunsplit, parse_qs, quote
 
 import aiofiles
 import orjson
+from .errors import HttpResponseError
 from aiofiles.os import makedirs
 from httpx import Response, Client
 from textwrap import dedent
 
 from .constants import GREEN, MAGENTA, RED, RESET, MAX_GQL_CHAR_LIMIT, USER_AGENTS, ORANGE
+import asyncio
+
+DEFAULT_RESTRICT_WAIT = 100
 
 def init_session():
     client = Client(headers={
@@ -47,7 +51,10 @@ def build_params(params: dict) -> dict:
 async def save_json(r: Response, path: str | Path, name: str, **kwargs):
     if r is None:
       return
-      
+    
+    if r.status_code != 200:
+      return
+
     try:
         data = r.json()
         kwargs.pop('cursor', None)
@@ -62,7 +69,7 @@ async def save_json(r: Response, path: str | Path, name: str, **kwargs):
             await fp.write(orjson.dumps(data))
 
     except Exception as e:
-        print(f'Failed to save JSON data for {kwargs}\n{e}')
+        print(f'Failed to save JSON data for {kwargs}: {r}\n{e}')
 
 
 def flatten(seq: list | tuple) -> list:
