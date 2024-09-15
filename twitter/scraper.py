@@ -588,11 +588,18 @@ class Scraper:
         return data.pop() if kwargs.get('cursor') else flatten(data)
 
     async def _query(self, client: AsyncClient, operation: tuple, **kwargs) -> Response:
+        wait_restrict = kwargs.pop("wait_restrict", False)
+
+        for k in keys:
+            if k not in kwargs:
+                raise ValueError(f"Invalid args to query '{kwargs}', '{k}' field is needed")
+        
         keys, qid, name = operation
         params = {
             'variables': Operation.default_variables | keys | kwargs,
             'features': Operation.default_features,
         }
+
         r = await client.get(f'https://twitter.com/i/api/graphql/{qid}/{name}', params=build_params(params))
 
         wait_restrict = kwargs.pop("wait_restrict", False)
