@@ -13,6 +13,7 @@ from tqdm.asyncio import tqdm_asyncio
 from .constants import *
 from .login import login
 from .util import *
+import time
 
 try:
     if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
@@ -29,8 +30,6 @@ if platform.system() != 'Windows':
         uvloop.install()
     except ImportError as e:
         ...
-
-DEFAULT_RESTRICT_WAIT = 10
 
 class Scraper:
     def __init__(self, email: str = None, username: str = None, password: str = None, session: Client = None, **kwargs):
@@ -604,19 +603,20 @@ class Scraper:
 
         r = await client.get(f'https://twitter.com/i/api/graphql/{qid}/{name}', params=build_params(params))
 
-        if r.status_code != 200:    
-          if r.status_code == 429 and wait_restrict:
-            print(f"\nRestiricted by API for {DEFAULT_RESTRICT_WAIT} secs.")
-            await asyncio.sleep(DEFAULT_RESTRICT_WAIT)
-            kwargs["wait_restrict"] = wait_restrict
-            await self._query(client, operation, **kwargs)
-          else:
-            raise HttpResponseError(r.text, r.status_code)
-
         try:
             self.rate_limits[name] = {k: int(v) for k, v in r.headers.items() if 'rate-limit' in k}
+            if name in self.rate_limits and self.rate_limits[name]['x-rate-limit-remaining'] == 0 and wait_restrict:
+              dur = self.rate_limits[name]['x-rate-limit-reset'] - time.time()
+              if dur > 0:
+                print(f"\nRestiricted by API for {dur} secs.")
+                await asyncio.sleep(dur)
+              kwargs["wait_restrict"] = wait_restrict
+              await self._query(client, operation, **kwargs)
         except Exception as e:
-            self.logger.debug(f'{e}')
+            self.logger.debug(f'Failed to set up rate limits {e}')
+
+        if r.status_code != 200:
+          raise HttpResponseError(r.text, r.status_code)
 
         if self.debug:
             log(self.logger, self.debug, r)

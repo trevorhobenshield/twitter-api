@@ -7,15 +7,11 @@ from urllib.parse import urlsplit, urlencode, urlunsplit, parse_qs, quote
 
 import aiofiles
 import orjson
-from .errors import HttpResponseError
 from aiofiles.os import makedirs
 from httpx import Response, Client
 from textwrap import dedent
 
 from .constants import GREEN, MAGENTA, RED, RESET, MAX_GQL_CHAR_LIMIT, USER_AGENTS, ORANGE
-import asyncio
-
-DEFAULT_RESTRICT_WAIT = 100
 
 def init_session():
     client = Client(headers={
